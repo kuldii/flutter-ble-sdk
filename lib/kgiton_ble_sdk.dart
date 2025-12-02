@@ -1,5 +1,5 @@
 /// KGiTON BLE SDK
-/// 
+///
 /// Minimal BLE SDK for KGiTON Scale devices
 library kgiton_ble_sdk;
 

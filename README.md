@@ -1,7 +1,11 @@
-# KGiTON BLE SDK
+<div align="center">
+  <img src="logo/kgiton-logo.png" alt="KGiTON Logo" width="600"/>
+  
+  # KGiTON BLE SDK
 
-[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](https://github.com/kuldii/flutter-ble-sdk)
+  [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+  [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](https://github.com/kuldii/flutter-ble-sdk)
+</div>
 
 Official Bluetooth Low Energy SDK for KGiTON Scale devices.
 

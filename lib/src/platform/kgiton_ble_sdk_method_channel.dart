@@ -26,9 +26,7 @@ class MethodChannelKgitonBleSdk extends KgitonBleSdkPlatform {
 
       switch (type) {
         case 'scanResult':
-          final devices = (map['devices'] as List)
-              .map((d) => BleDevice.fromMap(Map<String, dynamic>.from(d)))
-              .toList();
+          final devices = (map['devices'] as List).map((d) => BleDevice.fromMap(Map<String, dynamic>.from(d))).toList();
           _scanResultsController.add(devices);
           break;
 
@@ -63,10 +61,7 @@ class MethodChannelKgitonBleSdk extends KgitonBleSdkPlatform {
 
   @override
   Future<void> startScan({String? deviceNameFilter, int? timeoutSeconds}) async {
-    await _channel.invokeMethod('startScan', {
-      'deviceNameFilter': deviceNameFilter,
-      'timeoutSeconds': timeoutSeconds ?? 15,
-    });
+    await _channel.invokeMethod('startScan', {'deviceNameFilter': deviceNameFilter, 'timeoutSeconds': timeoutSeconds ?? 15});
   }
 
   @override
@@ -98,47 +93,26 @@ class MethodChannelKgitonBleSdk extends KgitonBleSdkPlatform {
       // Add deviceId to each characteristic
       final chars = (s['characteristics'] as List).cast<Map<String, dynamic>>();
       final updatedChars = chars.map((c) {
-        return {
-          ...c,
-          'deviceId': deviceId,
-          'serviceUuid': s['uuid'],
-        };
+        return {...c, 'deviceId': deviceId, 'serviceUuid': s['uuid']};
       }).toList();
-      
-      return BleService.fromMap({
-        'uuid': s['uuid'],
-        'characteristics': updatedChars,
-      });
+
+      return BleService.fromMap({'uuid': s['uuid'], 'characteristics': updatedChars});
     }).toList();
   }
 
   @override
   Future<void> setNotify(String deviceId, String serviceUuid, String charUuid, bool enable) async {
-    await _channel.invokeMethod('setNotify', {
-      'deviceId': deviceId,
-      'serviceUuid': serviceUuid,
-      'characteristicUuid': charUuid,
-      'enable': enable,
-    });
+    await _channel.invokeMethod('setNotify', {'deviceId': deviceId, 'serviceUuid': serviceUuid, 'characteristicUuid': charUuid, 'enable': enable});
   }
 
   @override
   Future<void> write(String deviceId, String serviceUuid, String charUuid, List<int> data) async {
-    await _channel.invokeMethod('write', {
-      'deviceId': deviceId,
-      'serviceUuid': serviceUuid,
-      'characteristicUuid': charUuid,
-      'data': data,
-    });
+    await _channel.invokeMethod('write', {'deviceId': deviceId, 'serviceUuid': serviceUuid, 'characteristicUuid': charUuid, 'data': data});
   }
 
   @override
   Future<List<int>> read(String deviceId, String serviceUuid, String charUuid) async {
-    final result = await _channel.invokeMethod('read', {
-      'deviceId': deviceId,
-      'serviceUuid': serviceUuid,
-      'characteristicUuid': charUuid,
-    });
+    final result = await _channel.invokeMethod('read', {'deviceId': deviceId, 'serviceUuid': serviceUuid, 'characteristicUuid': charUuid});
     return List<int>.from(result as List);
   }
 

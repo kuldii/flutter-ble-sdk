@@ -6,7 +6,7 @@ import 'models/ble_connection_state.dart';
 import 'platform/kgiton_ble_sdk_platform_interface.dart';
 
 /// Main KGiTON BLE SDK class
-/// 
+///
 /// Provides minimal BLE functionality for KGiTON Scale devices
 class KgitonBleSdk {
   final _platform = KgitonBleSdkPlatform.instance;
@@ -36,7 +36,7 @@ class KgitonBleSdk {
     _platform.notifications.listen((notification) {
       final charId = notification.keys.first;
       final data = notification.values.first;
-      
+
       if (_notificationControllers.containsKey(charId)) {
         _notificationControllers[charId]!.add(data);
       }
@@ -48,17 +48,11 @@ class KgitonBleSdk {
   // ============================================
 
   /// Start scanning for BLE devices
-  /// 
+  ///
   /// [deviceNameFilter] - Only return devices with names containing this string
   /// [timeout] - Maximum scan duration (default 15 seconds)
-  Future<void> startScan({
-    String? deviceNameFilter,
-    Duration? timeout,
-  }) async {
-    await _platform.startScan(
-      deviceNameFilter: deviceNameFilter,
-      timeoutSeconds: timeout?.inSeconds ?? 15,
-    );
+  Future<void> startScan({String? deviceNameFilter, Duration? timeout}) async {
+    await _platform.startScan(deviceNameFilter: deviceNameFilter, timeoutSeconds: timeout?.inSeconds ?? 15);
   }
 
   /// Stop scanning
@@ -98,14 +92,14 @@ class KgitonBleSdk {
   /// Discover services and characteristics for a connected device
   Future<List<BleService>> discoverServices(String deviceId) async {
     final services = await _platform.discoverServices(deviceId);
-    
+
     // Cache characteristics for easy lookup
     final chars = <BleCharacteristic>[];
     for (final service in services) {
       chars.addAll(service.characteristics);
     }
     _characteristicsCache[deviceId] = chars;
-    
+
     return services;
   }
 
@@ -113,12 +107,9 @@ class KgitonBleSdk {
   BleCharacteristic? getCharacteristic(String deviceId, String serviceUuid, String charUuid) {
     final chars = _characteristicsCache[deviceId];
     if (chars == null) return null;
-    
+
     try {
-      return chars.firstWhere(
-        (c) => c.uuid.toLowerCase() == charUuid.toLowerCase() && 
-               c.serviceUuid.toLowerCase() == serviceUuid.toLowerCase(),
-      );
+      return chars.firstWhere((c) => c.uuid.toLowerCase() == charUuid.toLowerCase() && c.serviceUuid.toLowerCase() == serviceUuid.toLowerCase());
     } catch (e) {
       return null;
     }
@@ -134,13 +125,13 @@ class KgitonBleSdk {
     if (parts.length != 3) {
       throw ArgumentError('Invalid characteristic ID format. Expected: deviceId:serviceUuid:charUuid');
     }
-    
+
     final deviceId = parts[0];
     final serviceUuid = parts[1];
     final charUuid = parts[2];
-    
+
     await _platform.setNotify(deviceId, serviceUuid, charUuid, enable);
-    
+
     // Create stream controller if enabling notifications
     if (enable && !_notificationControllers.containsKey(characteristicId)) {
       _notificationControllers[characteristicId] = StreamController<List<int>>.broadcast();
@@ -153,11 +144,11 @@ class KgitonBleSdk {
     if (parts.length != 3) {
       throw ArgumentError('Invalid characteristic ID format. Expected: deviceId:serviceUuid:charUuid');
     }
-    
+
     final deviceId = parts[0];
     final serviceUuid = parts[1];
     final charUuid = parts[2];
-    
+
     await _platform.write(deviceId, serviceUuid, charUuid, data);
   }
 
@@ -167,11 +158,11 @@ class KgitonBleSdk {
     if (parts.length != 3) {
       throw ArgumentError('Invalid characteristic ID format. Expected: deviceId:serviceUuid:charUuid');
     }
-    
+
     final deviceId = parts[0];
     final serviceUuid = parts[1];
     final charUuid = parts[2];
-    
+
     return await _platform.read(deviceId, serviceUuid, charUuid);
   }
 

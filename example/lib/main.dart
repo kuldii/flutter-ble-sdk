@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
   String? _connectedDeviceId;
   bool _isScanning = false;
   List<BleService> _services = [];
-  
+
   StreamSubscription? _scanSubscription;
   StreamSubscription? _connectionSubscription;
 
@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
       _isScanning = true;
       _devices.clear();
     });
-    
+
     try {
       await _bleSdk.startScan(
         deviceNameFilter: 'KGiTON', // Filter for KGiTON devices
@@ -204,12 +204,10 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const Divider(),
-          
+
           // Device List
           Expanded(
-            child: _connectedDeviceId == null
-                ? _buildDeviceList()
-                : _buildServiceList(),
+            child: _connectedDeviceId == null ? _buildDeviceList() : _buildServiceList(),
           ),
         ],
       ),
@@ -324,7 +322,7 @@ class _HomePageState extends State<HomePage> {
     try {
       await _bleSdk.setNotify(char.id, true);
       _showSnackBar('Notifications enabled for ${char.uuid}');
-      
+
       // Listen to notifications
       _bleSdk.notificationStream(char.id).listen((data) {
         _showSnackBar('Notification: ${data.join(', ')}');
