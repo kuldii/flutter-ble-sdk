@@ -1,0 +1,29 @@
+name: kgiton_ble_sdk
+description: Commercial BLE SDK for KGiTON Scale devices - Proprietary License (Authorization Required)
+version: 1.0.0
+homepage: https://github.com/kuldii/flutter-ble-sdk
+repository: https://github.com/kuldii/flutter-ble-sdk
+issue_tracker: https://github.com/kuldii/flutter-ble-sdk/issues
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.kgiton.kgiton_ble_sdk
+        pluginClass: KgitonBleSdkPlugin
+      ios:
+        pluginClass: KgitonBleSdkPlugin
