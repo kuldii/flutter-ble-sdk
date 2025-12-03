@@ -26,6 +26,7 @@ class BleManager(private val context: Context) {
     private var eventSink: EventChannel.EventSink? = null
     private val connectedDevices = ConcurrentHashMap<String, BluetoothGatt>()
     private val discoveredDevices = mutableMapOf<String, ScanResult>()
+    private val pendingDiscoveryResults = ConcurrentHashMap<String, MethodChannel.Result>()
     
     private var isScanning = false
     private var scanTimeoutRunnable: Runnable? = null
@@ -260,8 +261,40 @@ class BleManager(private val context: Context) {
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            val deviceId = gatt.device.address
+            
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d(tag, "Services discovered for ${gatt.device.address}")
+                Log.d(tag, "Services discovered for $deviceId: ${gatt.services.size} services")
+                
+                // Check if there's a pending discovery result
+                val pendingResult = pendingDiscoveryResults.remove(deviceId)
+                if (pendingResult != null) {
+                    handler.post {
+                        val services = gatt.services.map { service ->
+                            Log.d(tag, "Service: ${service.uuid} with ${service.characteristics.size} characteristics")
+                            mapOf(
+                                "uuid" to service.uuid.toString(),
+                                "characteristics" to service.characteristics.map { char ->
+                                    mapOf(
+                                        "uuid" to char.uuid.toString(),
+                                        "canRead" to (char.properties and BluetoothGattCharacteristic.PROPERTY_READ != 0),
+                                        "canWrite" to (char.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0),
+                                        "canNotify" to (char.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
+                                    )
+                                }
+                            )
+                        }
+                        pendingResult.success(services)
+                    }
+                }
+            } else {
+                Log.e(tag, "Service discovery failed for $deviceId with status: $status")
+                val pendingResult = pendingDiscoveryResults.remove(deviceId)
+                if (pendingResult != null) {
+                    handler.post {
+                        pendingResult.error("DISCOVERY_FAILED", "Service discovery failed with status: $status", null)
+                    }
+                }
             }
         }
 
@@ -291,29 +324,26 @@ class BleManager(private val context: Context) {
             return
         }
 
+        Log.d(tag, "Starting service discovery for $deviceId")
+        
+        // Store the result to be called back when onServicesDiscovered is triggered
+        pendingDiscoveryResults[deviceId] = result
+        
         // Trigger service discovery
         if (!gatt.discoverServices()) {
+            pendingDiscoveryResults.remove(deviceId)
             result.error("DISCOVERY_FAILED", "Failed to start service discovery", null)
             return
         }
-
-        // Wait for services to be discovered (callback will be called)
+        
+        // Set a timeout in case the callback never comes
         handler.postDelayed({
-            val services = gatt.services.map { service ->
-                mapOf(
-                    "uuid" to service.uuid.toString(),
-                    "characteristics" to service.characteristics.map { char ->
-                        mapOf(
-                            "uuid" to char.uuid.toString(),
-                            "canRead" to (char.properties and BluetoothGattCharacteristic.PROPERTY_READ != 0),
-                            "canWrite" to (char.properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0),
-                            "canNotify" to (char.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0)
-                        )
-                    }
-                )
+            val pendingResult = pendingDiscoveryResults.remove(deviceId)
+            if (pendingResult != null) {
+                Log.e(tag, "Service discovery timeout for $deviceId")
+                pendingResult.error("DISCOVERY_TIMEOUT", "Service discovery timed out", null)
             }
-            result.success(services)
-        }, 1000)
+        }, 10000) // 10 second timeout
     }
 
     fun setNotify(deviceId: String, serviceUuid: String, charUuid: String, enable: Boolean, result: MethodChannel.Result) {
