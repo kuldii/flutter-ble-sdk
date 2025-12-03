@@ -312,6 +312,24 @@ class BleManager(private val context: Context) {
                 "data" to data
             ))
         }
+
+        override fun onDescriptorWrite(gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int) {
+            val deviceId = gatt.device.address
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d(tag, "Descriptor write successful for $deviceId")
+            } else {
+                Log.e(tag, "Descriptor write failed for $deviceId with status: $status")
+            }
+        }
+
+        override fun onCharacteristicWrite(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
+            val deviceId = gatt.device.address
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d(tag, "Characteristic write successful for $deviceId")
+            } else {
+                Log.e(tag, "Characteristic write failed for $deviceId with status: $status")
+            }
+        }
     }
 
     // ============================================
