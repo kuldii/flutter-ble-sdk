@@ -362,7 +362,7 @@ class BleManager(private val context: Context) {
                 Log.e(tag, "Service discovery timeout for $deviceId")
                 pendingResult.error("DISCOVERY_TIMEOUT", "Service discovery timed out", null)
             }
-        }, 10000) // 10 second timeout
+        }, 5000) // 5 second timeout
     }
 
     fun setNotify(deviceId: String, serviceUuid: String, charUuid: String, enable: Boolean, result: MethodChannel.Result) {
