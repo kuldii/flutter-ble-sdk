@@ -92,12 +92,120 @@ This is the initial release. No migration required.
 
 ---
 
+## [1.1.0] - 2025-12-03
+
+### Added - Robustness Improvements 🛡️
+
+#### Error Handling
+- **Custom Exception Types**: Comprehensive exception hierarchy
+  - `BleException` - Base exception for all BLE errors
+  - `BleScanException` - Scan operation failures
+  - `BleConnectionException` - Connection failures with device context
+  - `BleServiceDiscoveryException` - Service discovery errors
+  - `BleCharacteristicException` - Characteristic operation errors
+  - `BleTimeoutException` - Operation timeout errors
+  - `BleNotAvailableException` - Bluetooth unavailable errors
+  - `BlePermissionException` - Permission denial errors
+- All exceptions include original error and stack trace for debugging
+
+#### Retry Logic & Resilience
+- **RetryPolicy Configuration**: Flexible retry policies
+  - Exponential backoff strategy
+  - Configurable max attempts (default: 3)
+  - Configurable initial delay and backoff multiplier
+  - Custom retry conditions with `retryIf` predicate
+  - Pre-defined policies: `defaultPolicy`, `aggressivePolicy`, `noRetry`
+- **RetryExecutor**: Automatic retry mechanism for all BLE operations
+  - Retry with timeout support
+  - Smart backoff to prevent overwhelming the device
+  - Operation-specific retry configuration
+
+#### Connection Stability
+- **Auto-Reconnection**: Automatic reconnection on unexpected disconnect
+  - Configurable reconnection attempts (default: 3)
+  - Exponential backoff between attempts
+  - Reconnection state events
+- **Connection Timeout**: Configurable timeout for connection attempts (default: 10s)
+- **Keep-Alive Mechanism**: 
+  - Periodic ping to detect connection issues
+  - Configurable keep-alive interval (default: 30s)
+  - Idle timeout detection (default: 60s)
+  - Automatic disconnect on connection loss
+- **ConnectionConfig**: Three pre-configured profiles
+  - `production`: Balanced reliability (auto-reconnect + keep-alive)
+  - `development`: Minimal features for testing
+  - `aggressive`: Maximum reliability for critical applications
+
+#### Data Validation & Sanitization
+- **BleDataValidator**: Comprehensive input validation
+  - Device ID format validation (MAC, UUID)
+  - UUID format validation (16-bit and 128-bit)
+  - Characteristic ID format validation
+  - Byte array validation (0-255 range)
+  - Timeout duration validation
+  - Device name sanitization
+- **ChecksumCalculator**: Data integrity verification
+  - XOR checksum calculation and validation
+  - Sum checksum calculation and validation
+  - Automatic checksum appending
+- **BleDataSanitizer**: Safe data handling
+  - MTU limit enforcement (default: 512 bytes)
+  - Null terminator removal
+  - Data padding to required length
+  - Safe string-to-bytes conversion
+  - Safe bytes-to-string with fallback
+
+#### Logging & Debugging
+- **Structured Logging**: Optional debug logging
+  - Enable/disable logging via constructor
+  - Operation tracking (connect, disconnect, read, write, etc.)
+  - Error and warning messages
+  - Performance tracking
+- All critical operations logged for troubleshooting
+
+#### Testing
+- **Unit Tests**: 31 tests covering core functionality
+  - Data validation tests (10 tests)
+  - Checksum calculation tests (4 tests)
+  - Data sanitization tests (7 tests)
+  - Retry policy tests (5 tests)
+  - Connection configuration tests (3 tests)
+- **100% pass rate** on all unit tests
+
+### Changed
+
+#### API Improvements
+- SDK constructor now accepts configuration parameters:
+  ```dart
+  KgitonBleSdk({
+    ConnectionConfig connectionConfig = ConnectionConfig.production,
+    RetryPolicy retryPolicy = RetryPolicy.defaultPolicy,
+    bool enableLogging = false,
+  })
+  ```
+- All operations now throw specific exception types instead of generic errors
+- Operations automatically include retry logic
+- Connection operations include automatic reconnection management
+
+#### Internal Improvements
+- All write operations validate and sanitize data before transmission
+- All read operations include timeout and retry logic
+- Connection state changes trigger reconnection if configured
+- Keep-alive automatically starts on successful connection
+- Activity tracking for idle timeout detection
+
+### Fixed
+- Hardcoded Kotlin version (1.9.22) to prevent gradle dependency errors
+- Escaped dollar signs in string interpolation throughout kgiton_scale_service.dart
+
+### Documentation
+- Updated exports to include new utilities and exceptions
+- Added API documentation for all new classes and methods
+
 ## [Unreleased]
 
-### Planned for v1.1.0
+### Planned for v1.2.0
 - [ ] Complete iOS implementation with CoreBluetooth
-- [ ] Enhanced error handling and error types
-- [ ] Connection retry mechanism
 - [ ] MTU negotiation support
 - [ ] Bond management (pairing)
 - [ ] Background operation support
