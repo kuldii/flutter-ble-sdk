@@ -32,7 +32,8 @@ class BleCharacteristic {
   }
 
   /// Unique identifier for this characteristic
-  String get id => '$deviceId:$serviceUuid:$uuid';
+  /// Format: deviceId|serviceUuid|charUuid (using | to avoid conflict with MAC address :)
+  String get id => '$deviceId|$serviceUuid|$uuid';
 
   @override
   bool operator ==(Object other) {

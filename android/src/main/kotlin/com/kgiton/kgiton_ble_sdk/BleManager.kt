@@ -302,7 +302,8 @@ class BleManager(private val context: Context) {
             val deviceId = gatt.device.address
             val serviceUuid = characteristic.service.uuid.toString()
             val charUuid = characteristic.uuid.toString()
-            val charId = "$deviceId:$serviceUuid:$charUuid"
+            // Use | separator to avoid conflict with MAC address colons
+            val charId = "$deviceId|$serviceUuid|$charUuid"
             val data = characteristic.value.map { it.toInt() }
 
             sendEvent(mapOf(

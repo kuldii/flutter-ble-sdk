@@ -269,9 +269,9 @@ class KgitonBleSdk {
 
   /// Enable or disable notifications for a characteristic
   Future<void> setNotify(String characteristicId, bool enable) async {
-    final parts = characteristicId.split(':');
+    final parts = characteristicId.split('|');
     if (parts.length != 3) {
-      throw ArgumentError('Invalid characteristic ID format. Expected: deviceId:serviceUuid:charUuid');
+      throw ArgumentError('Invalid characteristic ID format. Expected: deviceId|serviceUuid|charUuid');
     }
 
     final deviceId = parts[0];
@@ -300,7 +300,7 @@ class KgitonBleSdk {
       throw BleCharacteristicException('Invalid data: contains values outside 0-255 range', 'write', characteristicId: characteristicId);
     }
 
-    final parts = characteristicId.split(':');
+    final parts = characteristicId.split('|');
     final deviceId = parts[0];
     final serviceUuid = parts[1];
     final charUuid = parts[2];
@@ -337,7 +337,7 @@ class KgitonBleSdk {
       throw BleCharacteristicException('Invalid characteristic ID format', 'read', characteristicId: characteristicId);
     }
 
-    final parts = characteristicId.split(':');
+    final parts = characteristicId.split('|');
     final deviceId = parts[0];
     final serviceUuid = parts[1];
     final charUuid = parts[2];

@@ -23,11 +23,12 @@ class BleDataValidator {
     return shortUuidRegex.hasMatch(uuid) || fullUuidRegex.hasMatch(uuid);
   }
 
-  /// Validate characteristic ID format (deviceId:serviceUuid:charUuid)
+  /// Validate characteristic ID format (deviceId|serviceUuid|charUuid)
+  /// Note: Using | separator to avoid conflict with MAC address colons
   static bool isValidCharacteristicId(String? charId) {
     if (charId == null || charId.isEmpty) return false;
 
-    final parts = charId.split(':');
+    final parts = charId.split('|');
     if (parts.length != 3) return false;
 
     return isValidDeviceId(parts[0]) && isValidUuid(parts[1]) && isValidUuid(parts[2]);
