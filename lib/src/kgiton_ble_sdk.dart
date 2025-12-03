@@ -19,10 +19,10 @@ import 'utils/data_validation.dart';
 /// - Comprehensive error handling
 class KgitonBleSdk {
   final _platform = KgitonBleSdkPlatform.instance;
-  
+
   /// Configuration for connection stability
   final ConnectionConfig connectionConfig;
-  
+
   /// Retry policy for operations
   final RetryPolicy retryPolicy;
 
@@ -45,11 +45,7 @@ class KgitonBleSdk {
   /// Enable debug logging
   final bool enableLogging;
 
-  KgitonBleSdk({
-    this.connectionConfig = ConnectionConfig.production,
-    this.retryPolicy = RetryPolicy.defaultPolicy,
-    this.enableLogging = false,
-  }) {
+  KgitonBleSdk({this.connectionConfig = ConnectionConfig.production, this.retryPolicy = RetryPolicy.defaultPolicy, this.enableLogging = false}) {
     _setupListeners();
   }
 
@@ -96,11 +92,11 @@ class KgitonBleSdk {
   ///
   /// [deviceNameFilter] - Only return devices with names containing this string
   /// [timeout] - Maximum scan duration (default 15 seconds)
-  /// 
+  ///
   /// Throws [BleScanException] if scan fails
   Future<void> startScan({String? deviceNameFilter, Duration? timeout}) async {
     final scanTimeout = timeout ?? const Duration(seconds: 15);
-    
+
     // Validate timeout
     if (!BleDataValidator.isValidTimeout(scanTimeout)) {
       throw BleScanException('Invalid scan timeout: must be between 1s and 300s');
@@ -110,10 +106,7 @@ class KgitonBleSdk {
 
     try {
       await RetryExecutor.execute(
-        operation: () => _platform.startScan(
-          deviceNameFilter: deviceNameFilter,
-          timeoutSeconds: scanTimeout.inSeconds,
-        ),
+        operation: () => _platform.startScan(deviceNameFilter: deviceNameFilter, timeoutSeconds: scanTimeout.inSeconds),
         policy: RetryPolicy.noRetry, // Don't retry scan operations
         operationName: 'startScan',
       );
@@ -136,7 +129,7 @@ class KgitonBleSdk {
   // ============================================
 
   /// Connect to a BLE device with automatic reconnection support
-  /// 
+  ///
   /// Throws [BleConnectionException] if connection fails
   Future<void> connect(String deviceId) async {
     // Validate device ID
@@ -222,7 +215,7 @@ class KgitonBleSdk {
   // ============================================
 
   /// Discover services and characteristics for a connected device
-  /// 
+  ///
   /// Throws [BleServiceDiscoveryException] if discovery fails
   Future<List<BleService>> discoverServices(String deviceId) async {
     if (!BleDataValidator.isValidDeviceId(deviceId)) {
@@ -294,7 +287,7 @@ class KgitonBleSdk {
   }
 
   /// Write data to a characteristic with validation and retry
-  /// 
+  ///
   /// Throws [BleCharacteristicException] if write fails
   Future<void> write(String characteristicId, List<int> data) async {
     // Validate characteristic ID
@@ -336,7 +329,7 @@ class KgitonBleSdk {
   }
 
   /// Read data from a characteristic with validation and retry
-  /// 
+  ///
   /// Throws [BleCharacteristicException] if read fails
   Future<List<int>> read(String characteristicId) async {
     // Validate characteristic ID
@@ -404,7 +397,7 @@ class KgitonBleSdk {
       controller.close();
     }
     _notificationControllers.clear();
-    
+
     // Clear caches
     _characteristicsCache.clear();
     _connectionStates.clear();

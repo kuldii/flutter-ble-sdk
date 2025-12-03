@@ -11,10 +11,7 @@ void main() {
       });
 
       test('should accept valid UUID', () {
-        expect(
-          BleDataValidator.isValidDeviceId('12345678-1234-1234-1234-123456789abc'),
-          true,
-        );
+        expect(BleDataValidator.isValidDeviceId('12345678-1234-1234-1234-123456789abc'), true);
       });
 
       test('should accept long device IDs', () {
@@ -35,10 +32,7 @@ void main() {
       });
 
       test('should accept full UUIDs', () {
-        expect(
-          BleDataValidator.isValidUuid('12345678-1234-1234-1234-123456789abc'),
-          true,
-        );
+        expect(BleDataValidator.isValidUuid('12345678-1234-1234-1234-123456789abc'), true);
       });
 
       test('should reject invalid UUIDs', () {
@@ -53,12 +47,7 @@ void main() {
       test('should accept valid characteristic IDs', () {
         // Format: deviceId:serviceUuid:charUuid (3 parts)
         // Using UUID format for device ID to avoid : delimiter conflict
-        expect(
-          BleDataValidator.isValidCharacteristicId(
-            '12345678-1234-1234-1234-123456789abc:180F:2A19',
-          ),
-          true,
-        );
+        expect(BleDataValidator.isValidCharacteristicId('12345678-1234-1234-1234-123456789abc:180F:2A19'), true);
       });
 
       test('should reject invalid characteristic IDs', () {
@@ -121,7 +110,7 @@ void main() {
       final data = [1, 2, 3, 4];
       final withChecksum = ChecksumCalculator.addXorChecksum(data);
       expect(ChecksumCalculator.validateXor(withChecksum), true);
-      
+
       final corrupted = [...withChecksum];
       corrupted[0] = 99;
       expect(ChecksumCalculator.validateXor(corrupted), false);
@@ -131,7 +120,7 @@ void main() {
       final data = [10, 20, 30];
       final withChecksum = ChecksumCalculator.addSumChecksum(data);
       expect(ChecksumCalculator.validateSum(withChecksum), true);
-      
+
       final corrupted = [...withChecksum];
       corrupted[1] = 99;
       expect(ChecksumCalculator.validateSum(corrupted), false);
@@ -155,7 +144,7 @@ void main() {
       final data = [1, 2, 3];
       final padded = BleDataSanitizer.padToLength(data, 5);
       expect(padded, [1, 2, 3, 0, 0]);
-      
+
       final paddedCustom = BleDataSanitizer.padToLength(data, 5, paddingByte: 255);
       expect(paddedCustom, [1, 2, 3, 255, 255]);
     });
@@ -163,7 +152,7 @@ void main() {
     test('should convert string to safe bytes', () {
       final bytes = BleDataSanitizer.stringToSafeBytes('Hello');
       expect(bytes, [72, 101, 108, 108, 111]);
-      
+
       final limited = BleDataSanitizer.stringToSafeBytes('Hello World', maxLength: 5);
       expect(limited.length, 5);
     });

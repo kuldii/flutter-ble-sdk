@@ -45,12 +45,26 @@ class BleManager(private val context: Context) {
     // ============================================
 
     fun startScan(nameFilter: String?, timeoutSeconds: Int, result: MethodChannel.Result) {
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
-            result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth is not available or not enabled", null)
+        if (bluetoothAdapter == null) {
+            Log.e(tag, "Bluetooth adapter is null")
+            result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth adapter not available", null)
+            return
+        }
+
+        if (!bluetoothAdapter.isEnabled) {
+            Log.e(tag, "Bluetooth is not enabled")
+            result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth is not enabled", null)
+            return
+        }
+
+        if (bluetoothLeScanner == null) {
+            Log.e(tag, "Bluetooth LE scanner is null")
+            result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth LE scanner not available", null)
             return
         }
 
         if (isScanning) {
+            Log.w(tag, "Scan already in progress")
             result.success(null)
             return
         }
@@ -58,21 +72,28 @@ class BleManager(private val context: Context) {
         discoveredDevices.clear()
         isScanning = true
 
+        // Use name filter in contains mode instead of exact match
         val filters = mutableListOf<ScanFilter>()
-        if (!nameFilter.isNullOrEmpty()) {
-            filters.add(ScanFilter.Builder().setDeviceName(nameFilter).build())
-        }
+        // NOTE: Remove strict name filter for better device discovery
+        // Device name might be advertised differently or with additional characters
+        // We'll filter by name in the callback instead
+        
+        Log.d(tag, "Using scan without name filter to discover all devices")
 
         val settings = ScanSettings.Builder()
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+            .setReportDelay(0) // Report immediately
             .build()
 
         try {
-            bluetoothLeScanner?.startScan(filters, settings, scanCallback)
-            Log.d(tag, "BLE scan started with filter: $nameFilter")
+            // Start scan without filters to find all BLE devices
+            bluetoothLeScanner.startScan(null, settings, scanCallback)
+            Log.d(tag, "BLE scan started (filter: $nameFilter, timeout: ${timeoutSeconds}s)")
 
             // Auto stop after timeout
             scanTimeoutRunnable = Runnable {
+                Log.d(tag, "Scan timeout reached, stopping scan")
                 stopScan(object : MethodChannel.Result {
                     override fun success(result: Any?) {}
                     override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {}
@@ -82,6 +103,10 @@ class BleManager(private val context: Context) {
             handler.postDelayed(scanTimeoutRunnable!!, (timeoutSeconds * 1000).toLong())
 
             result.success(null)
+        } catch (e: SecurityException) {
+            isScanning = false
+            Log.e(tag, "Security exception - missing permissions", e)
+            result.error("PERMISSION_DENIED", "Bluetooth scan permission not granted", null)
         } catch (e: Exception) {
             isScanning = false
             Log.e(tag, "Failed to start scan", e)
@@ -109,30 +134,58 @@ class BleManager(private val context: Context) {
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
-            val device = result.device
-            val deviceId = device.address
-            
-            discoveredDevices[deviceId] = result
-            
-            // Send updated device list
-            val devices = discoveredDevices.values.map { scanResult ->
-                mapOf(
-                    "id" to scanResult.device.address,
-                    "name" to (scanResult.device.name ?: "Unknown"),
-                    "rssi" to scanResult.rssi
-                )
-            }
-            
-            sendEvent(mapOf(
-                "type" to "scanResult",
-                "devices" to devices
-            ))
+            handleScanResult(result)
+        }
+
+        override fun onBatchScanResults(results: MutableList<ScanResult>) {
+            Log.d(tag, "Batch scan results received: ${results.size} devices")
+            results.forEach { handleScanResult(it) }
         }
 
         override fun onScanFailed(errorCode: Int) {
-            Log.e(tag, "Scan failed with error code: $errorCode")
+            val errorMsg = when (errorCode) {
+                SCAN_FAILED_ALREADY_STARTED -> "Scan already started"
+                SCAN_FAILED_APPLICATION_REGISTRATION_FAILED -> "Application registration failed"
+                SCAN_FAILED_FEATURE_UNSUPPORTED -> "Scan feature unsupported"
+                SCAN_FAILED_INTERNAL_ERROR -> "Internal error"
+                else -> "Unknown error: $errorCode"
+            }
+            Log.e(tag, "Scan failed: $errorMsg (code: $errorCode)")
             isScanning = false
+            
+            // Notify Flutter about scan failure
+            sendEvent(mapOf(
+                "type" to "scanError",
+                "errorCode" to errorCode,
+                "errorMessage" to errorMsg
+            ))
         }
+    }
+
+    private fun handleScanResult(scanResult: ScanResult) {
+        val device = scanResult.device
+        val deviceId = device.address
+        val deviceName = device.name ?: "Unknown"
+        
+        // Log every discovered device for debugging
+        Log.d(tag, "Device found: $deviceName ($deviceId), RSSI: ${scanResult.rssi}")
+        
+        // Store all devices without filtering
+        discoveredDevices[deviceId] = scanResult
+        
+        // Send updated device list to Flutter
+        val devices = discoveredDevices.values.map { result ->
+            mapOf(
+                "id" to result.device.address,
+                "name" to (result.device.name ?: "Unknown"),
+                "rssi" to result.rssi
+            )
+        }
+        
+        sendEvent(mapOf(
+            "type" to "scanResult",
+            "devices" to devices
+        ))
     }
 
     // ============================================

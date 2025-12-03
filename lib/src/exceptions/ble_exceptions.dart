@@ -25,7 +25,8 @@ class BleConnectionException extends BleException {
   BleConnectionException(super.message, {this.deviceId, super.originalError, super.stackTrace});
 
   @override
-  String toString() => 'BleConnectionException: $message${deviceId != null ? ' (Device: $deviceId)' : ''}${originalError != null ? ' ($originalError)' : ''}';
+  String toString() =>
+      'BleConnectionException: $message${deviceId != null ? ' (Device: $deviceId)' : ''}${originalError != null ? ' ($originalError)' : ''}';
 }
 
 /// Thrown when service discovery fails
@@ -46,7 +47,8 @@ class BleCharacteristicException extends BleException {
   BleCharacteristicException(super.message, this.operation, {this.characteristicId, super.originalError, super.stackTrace});
 
   @override
-  String toString() => 'BleCharacteristicException: $message (Operation: $operation)${characteristicId != null ? ' (Char: $characteristicId)' : ''}${originalError != null ? ' ($originalError)' : ''}';
+  String toString() =>
+      'BleCharacteristicException: $message (Operation: $operation)${characteristicId != null ? ' (Char: $characteristicId)' : ''}${originalError != null ? ' ($originalError)' : ''}';
 }
 
 /// Thrown when operation times out
@@ -54,7 +56,8 @@ class BleTimeoutException extends BleException {
   final Duration timeout;
   final String operation;
 
-  BleTimeoutException(this.operation, this.timeout, {super.originalError, super.stackTrace}) : super('Operation timed out after ${timeout.inSeconds}s');
+  BleTimeoutException(this.operation, this.timeout, {super.originalError, super.stackTrace})
+    : super('Operation timed out after ${timeout.inSeconds}s');
 
   @override
   String toString() => 'BleTimeoutException: $operation timed out after ${timeout.inSeconds}s';

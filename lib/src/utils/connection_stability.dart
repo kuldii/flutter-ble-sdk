@@ -77,12 +77,7 @@ class ReconnectionManager {
   Timer? _reconnectTimer;
   final _reconnectStateController = StreamController<ReconnectionState>.broadcast();
 
-  ReconnectionManager({
-    required this.deviceId,
-    required this.connectFunction,
-    required this.config,
-    this.onLog,
-  });
+  ReconnectionManager({required this.deviceId, required this.connectFunction, required this.config, this.onLog});
 
   /// Stream of reconnection state changes
   Stream<ReconnectionState> get reconnectionState => _reconnectStateController.stream;
@@ -111,12 +106,12 @@ class ReconnectionManager {
   Future<void> _attemptReconnect() async {
     while (_reconnectAttempts < config.maxReconnectAttempts && _isReconnecting) {
       _reconnectAttempts++;
-      
+
       onLog?.call('Reconnection attempt $_reconnectAttempts/${config.maxReconnectAttempts}');
 
       try {
         await connectFunction().timeout(config.connectionTimeout);
-        
+
         // Success!
         onLog?.call('Reconnected successfully');
         _isReconnecting = false;
@@ -125,7 +120,7 @@ class ReconnectionManager {
         return;
       } catch (e) {
         onLog?.call('Reconnection attempt $_reconnectAttempts failed: $e');
-        
+
         if (_reconnectAttempts >= config.maxReconnectAttempts) {
           onLog?.call('Max reconnection attempts reached');
           _isReconnecting = false;
@@ -165,13 +160,7 @@ class KeepAliveManager {
   Timer? _idleTimer;
   DateTime? _lastResponseTime;
 
-  KeepAliveManager({
-    required this.deviceId,
-    required this.pingFunction,
-    required this.config,
-    this.onConnectionLost,
-    this.onLog,
-  });
+  KeepAliveManager({required this.deviceId, required this.pingFunction, required this.config, this.onConnectionLost, this.onLog});
 
   /// Start keep-alive monitoring
   void start() {
@@ -208,7 +197,7 @@ class KeepAliveManager {
     if (_lastResponseTime == null) return;
 
     final idleDuration = DateTime.now().difference(_lastResponseTime!);
-    
+
     if (idleDuration > config.maxIdleTime) {
       onLog?.call('Connection idle timeout for $deviceId (${idleDuration.inSeconds}s)');
       onConnectionLost?.call();
@@ -237,8 +226,4 @@ class KeepAliveManager {
 }
 
 /// Reconnection state
-enum ReconnectionState {
-  connected,
-  reconnecting,
-  failed,
-}
+enum ReconnectionState { connected, reconnecting, failed }

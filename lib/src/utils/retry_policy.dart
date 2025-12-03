@@ -49,7 +49,7 @@ class RetryExecutor {
 
     while (true) {
       attempt++;
-      
+
       try {
         return await operation();
       } catch (e) {
@@ -66,10 +66,8 @@ class RetryExecutor {
         await Future.delayed(currentDelay);
 
         // Calculate next delay with exponential backoff
-        currentDelay = Duration(
-          milliseconds: (currentDelay.inMilliseconds * policy.backoffMultiplier).round(),
-        );
-        
+        currentDelay = Duration(milliseconds: (currentDelay.inMilliseconds * policy.backoffMultiplier).round());
+
         if (currentDelay > policy.maxDelay) {
           currentDelay = policy.maxDelay;
         }
@@ -87,9 +85,7 @@ class RetryExecutor {
     return await execute(
       operation: () => operation().timeout(
         timeout,
-        onTimeout: () => throw TimeoutException(
-          'Operation ${operationName ?? 'unknown'} timed out after ${timeout.inSeconds}s',
-        ),
+        onTimeout: () => throw TimeoutException('Operation ${operationName ?? 'unknown'} timed out after ${timeout.inSeconds}s'),
       ),
       policy: policy,
       operationName: operationName,

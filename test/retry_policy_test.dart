@@ -6,7 +6,7 @@ void main() {
   group('RetryExecutor', () {
     test('should succeed on first attempt', () async {
       int attempts = 0;
-      
+
       final result = await RetryExecutor.execute(
         operation: () async {
           attempts++;
@@ -21,7 +21,7 @@ void main() {
 
     test('should retry on failure and eventually succeed', () async {
       int attempts = 0;
-      
+
       final result = await RetryExecutor.execute(
         operation: () async {
           attempts++;
@@ -39,7 +39,7 @@ void main() {
 
     test('should throw after max attempts', () async {
       int attempts = 0;
-      
+
       expect(
         () => RetryExecutor.execute(
           operation: () async {
@@ -57,18 +57,14 @@ void main() {
 
     test('should respect retryIf condition', () async {
       int attempts = 0;
-      
+
       expect(
         () => RetryExecutor.execute(
           operation: () async {
             attempts++;
             throw FormatException('Not retryable');
           },
-          policy: RetryPolicy(
-            maxAttempts: 3,
-            initialDelay: Duration(milliseconds: 10),
-            retryIf: (e) => e is! FormatException,
-          ),
+          policy: RetryPolicy(maxAttempts: 3, initialDelay: Duration(milliseconds: 10), retryIf: (e) => e is! FormatException),
         ),
         throwsA(isA<FormatException>()),
       );
