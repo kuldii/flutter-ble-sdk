@@ -98,7 +98,7 @@ For bug reports or feature requests from authorized users:
 ## Questions?
 
 Contact the development team:
-- Technical Lead: [lead@kgiton.com]
+- Technical Lead: support@kgiton.com
 - Support: support@kgiton.com
 
 ---

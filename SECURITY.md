@@ -14,7 +14,7 @@ If you are an **authorized user** and discover a security vulnerability:
 - ❌ Share details with unauthorized parties
 
 ### DO:
-1. ✅ Email security details to: **security@kgiton.com**
+1. ✅ Email security details to: **support@kgiton.com**
 2. ✅ Include your license ID in the subject line
 3. ✅ Provide detailed information about the vulnerability
 4. ✅ Wait for acknowledgment from PT KGiTON security team
@@ -34,7 +34,7 @@ All security-related communications are considered confidential. By reporting a 
 
 ## Contact
 
-**Security Team**: security@kgiton.com  
+**Security Team**: support@kgiton.com  
 **General Support**: support@kgiton.com  
 **Website**: https://kgiton.com
 

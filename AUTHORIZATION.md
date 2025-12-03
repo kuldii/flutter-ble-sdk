@@ -131,11 +131,11 @@ Email: support@kgiton.com
 Response Time: Within 24 hours
 
 **Sales & Licensing**:  
-Email: sales@kgiton.com  
+Email: support@kgiton.com  
 Phone: [Your Phone Number]
 
 **Security Issues**:  
-Email: security@kgiton.com  
+Email: support@kgiton.com  
 (For authorized users only)
 
 ### Business Hours
@@ -157,7 +157,7 @@ A: You can renew your license to continue receiving updates and support. Existin
 A: No, this SDK cannot be used in open-source projects. Contact us for special arrangements.
 
 **Q: Do you offer discounts for startups or educational institutions?**  
-A: Yes, we offer special pricing. Contact sales@kgiton.com with details about your organization.
+A: Yes, we offer special pricing. Contact support@kgiton.com with details about your organization.
 
 **Q: Can I transfer my license?**  
 A: License transfers require approval from PT KGiTON. Contact support@kgiton.com.
