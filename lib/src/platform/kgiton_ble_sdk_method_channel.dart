@@ -88,15 +88,30 @@ class MethodChannelKgitonBleSdk extends KgitonBleSdkPlatform {
   @override
   Future<List<BleService>> discoverServices(String deviceId) async {
     final result = await _channel.invokeMethod('discoverServices', {'deviceId': deviceId});
-    final servicesList = (result as List).cast<Map<String, dynamic>>();
+    
+    // Convert result to proper List of Maps
+    final servicesList = (result as List).map((item) {
+      return Map<String, dynamic>.from(item as Map);
+    }).toList();
+    
     return servicesList.map((s) {
       // Add deviceId to each characteristic
-      final chars = (s['characteristics'] as List).cast<Map<String, dynamic>>();
-      final updatedChars = chars.map((c) {
-        return {...c, 'deviceId': deviceId, 'serviceUuid': s['uuid']};
+      final charsList = (s['characteristics'] as List).map((charItem) {
+        return Map<String, dynamic>.from(charItem as Map);
+      }).toList();
+      
+      final updatedChars = charsList.map((c) {
+        return {
+          ...c,
+          'deviceId': deviceId,
+          'serviceUuid': s['uuid'].toString(),
+        };
       }).toList();
 
-      return BleService.fromMap({'uuid': s['uuid'], 'characteristics': updatedChars});
+      return BleService.fromMap({
+        'uuid': s['uuid'].toString(),
+        'characteristics': updatedChars,
+      });
     }).toList();
   }
 
