@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:kgiton_ble_sdk/kgiton_ble_sdk.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,6 +36,8 @@ class _HomePageState extends State<HomePage> {
   String? _connectedDeviceId;
   bool _isScanning = false;
   List<BleService> _services = [];
+  bool _permissionsGranted = false;
+  String _deviceFilter = 'KGiTON';
 
   StreamSubscription? _scanSubscription;
   StreamSubscription? _connectionSubscription;
@@ -42,7 +45,65 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _checkPermissions();
     _initBle();
+  }
+
+  Future<void> _checkPermissions() async {
+    final bluetoothScan = await Permission.bluetoothScan.status;
+    final bluetoothConnect = await Permission.bluetoothConnect.status;
+    final location = await Permission.locationWhenInUse.status;
+
+    setState(() {
+      _permissionsGranted = bluetoothScan.isGranted && bluetoothConnect.isGranted && location.isGranted;
+    });
+  }
+
+  Future<bool> _requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.locationWhenInUse,
+    ].request();
+
+    bool allGranted = statuses.values.every((status) => status.isGranted);
+
+    if (!allGranted) {
+      bool permanentlyDenied = statuses.values.any((status) => status.isPermanentlyDenied);
+      if (permanentlyDenied && mounted) {
+        _showPermissionDialog();
+        return false;
+      }
+    }
+
+    setState(() {
+      _permissionsGranted = allGranted;
+    });
+
+    return allGranted;
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Permissions Required'),
+        content: const Text(
+          'This app requires Bluetooth and Location permissions to scan and connect to BLE devices.\n\n'
+          'Please enable permissions in Settings.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _initBle() {
@@ -74,6 +135,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _startScan() async {
+    if (!_permissionsGranted) {
+      final granted = await _requestPermissions();
+      if (!granted) {
+        _showSnackBar('Permissions required to scan');
+        return;
+      }
+    }
+
     setState(() {
       _isScanning = true;
       _devices.clear();
@@ -81,7 +150,7 @@ class _HomePageState extends State<HomePage> {
 
     try {
       await _bleSdk.startScan(
-        deviceNameFilter: 'KGiTON', // Filter for KGiTON devices
+        deviceNameFilter: _deviceFilter.isEmpty ? null : _deviceFilter,
         timeout: const Duration(seconds: 10),
       );
     } catch (e) {
@@ -166,6 +235,59 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                // Permission Status
+                if (!_permissionsGranted)
+                  Card(
+                    color: Colors.orange.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_amber, color: Colors.orange.shade700),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Permissions required for BLE operations',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: _requestPermissions,
+                            child: const Text('Grant'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 8),
+
+                // Device Filter
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Device Name Filter (optional)',
+                    hintText: 'e.g., KGiTON',
+                    prefixIcon: const Icon(Icons.filter_alt),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: _deviceFilter.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _deviceFilter = '';
+                              });
+                            },
+                          )
+                        : null,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _deviceFilter = value;
+                    });
+                  },
+                  controller: TextEditingController(text: _deviceFilter)..selection = TextSelection.collapsed(offset: _deviceFilter.length),
+                ),
+                const SizedBox(height: 16),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -309,12 +431,50 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _writeCharacteristic(BleCharacteristic char) async {
-    try {
-      // Example: Write [1, 2, 3]
-      await _bleSdk.write(char.id, [1, 2, 3]);
-      _showSnackBar('Write successful');
-    } catch (e) {
-      _showSnackBar('Write error: $e');
+    final controller = TextEditingController();
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Write Data'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Enter text to write',
+                hintText: 'e.g., Hello or BUZZ',
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Text will be converted to bytes',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: const Text('Write'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      try {
+        final bytes = result.codeUnits;
+        await _bleSdk.write(char.id, bytes);
+        _showSnackBar('Write successful: $result');
+      } catch (e) {
+        _showSnackBar('Write error: $e');
+      }
     }
   }
 

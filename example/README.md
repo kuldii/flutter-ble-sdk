@@ -4,12 +4,14 @@ Simple example app demonstrating how to use the `kgiton_ble_sdk` package.
 
 ## Features Demonstrated
 
-- 🔍 **Scanning**: Scan for BLE devices with optional name filter
+- 🔍 **Scanning**: Scan for BLE devices with customizable name filter
 - 🔗 **Connection**: Connect and disconnect from devices
 - 📋 **Service Discovery**: Discover services and characteristics
 - 📖 **Read**: Read characteristic values
-- ✍️ **Write**: Write data to characteristics
+- ✍️ **Write**: Write text data to characteristics with input dialog
 - 🔔 **Notify**: Subscribe to characteristic notifications
+- 🔐 **Permissions**: Automatic runtime permission handling
+- ⚙️ **Settings**: Quick access to app settings for permissions
 
 ## Getting Started
 
@@ -28,26 +30,51 @@ flutter run
 
 ### Usage
 
-1. **Tap "Scan"** to search for nearby BLE devices
-2. **Tap "Connect"** on a device to establish connection
-3. **Explore Services** and characteristics
-4. **Tap buttons** to read, write, or subscribe to notifications
+1. **Grant Permissions**: The app will request necessary permissions on first launch
+2. **Set Filter** (optional): Enter device name to filter scan results (e.g., "KGiTON")
+3. **Tap "Scan"** to search for nearby BLE devices
+4. **Tap "Connect"** on a device to establish connection
+5. **Explore Services** and characteristics
+6. **Interact**: 
+   - Tap 📖 to read values
+   - Tap ✍️ to write text (dialog will appear)
+   - Tap 🔔 to enable notifications
 
 ## Permissions
 
-The app requires these permissions (already configured in AndroidManifest.xml):
+The app automatically requests these permissions at runtime:
 
-- `BLUETOOTH` / `BLUETOOTH_ADMIN` - Basic Bluetooth operations
-- `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` - Android 12+ BLE operations
+- `BLUETOOTH_SCAN` - Scan for BLE devices (Android 12+)
+- `BLUETOOTH_CONNECT` - Connect to BLE devices (Android 12+)
 - `ACCESS_FINE_LOCATION` - Required for BLE scanning on Android
 
-## Screenshots
+**Note**: If permissions are denied permanently, the app provides a direct link to app settings.
 
-The example app demonstrates:
-- Device list with RSSI values
-- Connection status indicator
-- Service and characteristic explorer
-- Read/Write/Notify operations
+## Features in Detail
+
+### Permission Handling
+- Automatic permission check on app start
+- Runtime permission request with user-friendly dialogs
+- Direct link to app settings for permanently denied permissions
+- Visual permission status indicator
+
+### Device Scanning
+- Customizable device name filter
+- Real-time device list updates
+- RSSI signal strength display
+- Clear/reset filter option
+
+### Write Operations
+- Interactive text input dialog
+- Automatic text-to-bytes conversion
+- Success/error feedback via SnackBar
+- Example: Write "BUZZ" to trigger buzzer on KGiTON scale
+
+### Service Explorer
+- Expandable service list
+- Characteristic properties display (Read/Write/Notify)
+- Direct operation buttons for each capability
+- UUID information for debugging
 
 ## Code Structure
 
