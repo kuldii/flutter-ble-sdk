@@ -379,6 +379,13 @@ class KgitonBleSdk {
   void dispose() {
     _log('Disposing KGiTON BLE SDK');
 
+    // Stop any ongoing scan
+    try {
+      stopScan();
+    } catch (e) {
+      _log('Error stopping scan during dispose: $e');
+    }
+
     // Dispose all reconnection managers
     for (final manager in _reconnectionManagers.values) {
       manager.dispose();

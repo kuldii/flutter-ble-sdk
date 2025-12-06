@@ -189,26 +189,39 @@ class BleManager(private val context: Context) {
         val device = scanResult.device
         val deviceId = device.address
         val deviceName = device.name ?: "Unknown"
+        val rssi = scanResult.rssi
         
-        // Log every discovered device for debugging
-        Log.d(tag, "Device found: $deviceName ($deviceId), RSSI: ${scanResult.rssi}")
+        // Check if device is new or RSSI changed significantly (more than 5 dBm)
+        val existingDevice = discoveredDevices[deviceId]
+        val isNewDevice = existingDevice == null
+        val rssiChanged = existingDevice?.let { Math.abs(it.rssi - rssi) > 5 } ?: false
         
-        // Store all devices without filtering
-        discoveredDevices[deviceId] = scanResult
-        
-        // Send updated device list to Flutter
-        val devices = discoveredDevices.values.map { result ->
-            mapOf(
-                "id" to result.device.address,
-                "name" to (result.device.name ?: "Unknown"),
-                "rssi" to result.rssi
-            )
+        // Only process if it's a new device or RSSI changed significantly
+        if (isNewDevice || rssiChanged) {
+            // Log device discovery/update
+            if (isNewDevice) {
+                Log.d(tag, "New device found: $deviceName ($deviceId), RSSI: $rssi")
+            } else {
+                Log.d(tag, "Device RSSI updated: $deviceName ($deviceId), RSSI: $rssi")
+            }
+            
+            // Store/update device
+            discoveredDevices[deviceId] = scanResult
+            
+            // Send updated device list to Flutter (only when there's meaningful change)
+            val devices = discoveredDevices.values.map { result ->
+                mapOf(
+                    "id" to result.device.address,
+                    "name" to (result.device.name ?: "Unknown"),
+                    "rssi" to result.rssi
+                )
+            }
+            
+            sendEvent(mapOf(
+                "type" to "scanResult",
+                "devices" to devices
+            ))
         }
-        
-        sendEvent(mapOf(
-            "type" to "scanResult",
-            "devices" to devices
-        ))
     }
 
     // ============================================
