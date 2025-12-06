@@ -1,5 +1,6 @@
 package com.kgiton.kgiton_ble_sdk
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.bluetooth.le.BluetoothLeScanner
@@ -8,9 +9,13 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.core.content.ContextCompat
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import java.util.*
@@ -46,6 +51,7 @@ class BleManager(private val context: Context) {
     // ============================================
 
     fun startScan(nameFilter: String?, timeoutSeconds: Int, result: MethodChannel.Result) {
+        // Check Bluetooth adapter availability
         if (bluetoothAdapter == null) {
             Log.e(tag, "Bluetooth adapter is null")
             result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth adapter not available", null)
@@ -54,7 +60,7 @@ class BleManager(private val context: Context) {
 
         if (!bluetoothAdapter.isEnabled) {
             Log.e(tag, "Bluetooth is not enabled")
-            result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth is not enabled", null)
+            result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth is not enabled. Please enable Bluetooth.", null)
             return
         }
 
@@ -62,6 +68,22 @@ class BleManager(private val context: Context) {
             Log.e(tag, "Bluetooth LE scanner is null")
             result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth LE scanner not available", null)
             return
+        }
+
+        // Check runtime permissions for different Android versions
+        if (!checkBlePermissions()) {
+            Log.e(tag, "BLE permissions not granted")
+            result.error("PERMISSION_DENIED", "Required Bluetooth and Location permissions not granted. Please grant permissions in app settings.", null)
+            return
+        }
+
+        // For Android 10-11 (API 29-30), check if location service is enabled
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            if (!isLocationEnabled()) {
+                Log.e(tag, "Location service is disabled on Android ${Build.VERSION.SDK_INT}")
+                result.error("LOCATION_DISABLED", "Location service must be enabled for Bluetooth scanning on Android 10 and 11. Please enable location in device settings.", null)
+                return
+            }
         }
 
         if (isScanning) {
@@ -462,6 +484,86 @@ class BleManager(private val context: Context) {
             Log.e(tag, "Failed to read", e)
             result.error("READ_FAILED", e.message, null)
         }
+    }
+
+    // ============================================
+    // PERMISSION CHECKS
+    // ============================================
+
+    /**
+     * Check if all required BLE permissions are granted based on Android version
+     */
+    private fun checkBlePermissions(): Boolean {
+        return when {
+            // Android 12+ (API 31+)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                val hasScan = ContextCompat.checkSelfPermission(
+                    context, 
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) == PackageManager.PERMISSION_GRANTED
+                
+                val hasConnect = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) == PackageManager.PERMISSION_GRANTED
+
+                Log.d(tag, "Android 12+ Permission check - BLUETOOTH_SCAN: $hasScan, BLUETOOTH_CONNECT: $hasConnect")
+                hasScan && hasConnect
+            }
+            
+            // Android 10-11 (API 29-30) - Requires location permissions
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                val hasBluetooth = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH
+                ) == PackageManager.PERMISSION_GRANTED
+                
+                val hasBluetoothAdmin = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_ADMIN
+                ) == PackageManager.PERMISSION_GRANTED
+                
+                val hasFineLocation = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+                Log.d(tag, "Android 10-11 Permission check - BLUETOOTH: $hasBluetooth, BLUETOOTH_ADMIN: $hasBluetoothAdmin, FINE_LOCATION: $hasFineLocation")
+                hasBluetooth && hasBluetoothAdmin && hasFineLocation
+            }
+            
+            // Android 9 and below (API 28-)
+            else -> {
+                val hasBluetooth = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH
+                ) == PackageManager.PERMISSION_GRANTED
+                
+                val hasBluetoothAdmin = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_ADMIN
+                ) == PackageManager.PERMISSION_GRANTED
+                
+                val hasCoarseLocation = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+                Log.d(tag, "Android 9- Permission check - BLUETOOTH: $hasBluetooth, BLUETOOTH_ADMIN: $hasBluetoothAdmin, COARSE_LOCATION: $hasCoarseLocation")
+                hasBluetooth && hasBluetoothAdmin && hasCoarseLocation
+            }
+        }
+    }
+
+    /**
+     * Check if location service is enabled (required for Android 10-11)
+     */
+    private fun isLocationEnabled(): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        return locationManager?.let {
+            it.isProviderEnabled(LocationManager.GPS_PROVIDER) || 
+            it.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        } ?: false
     }
 
     // ============================================
