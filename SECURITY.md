@@ -36,7 +36,7 @@ All security-related communications are considered confidential. By reporting a 
 
 **Security Team**: support@kgiton.com  
 **General Support**: support@kgiton.com  
-**Website**: https://kgiton.com
+**Website**: https://www.kgiton.com
 
 ---
 

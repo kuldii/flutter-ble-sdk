@@ -116,9 +116,7 @@ Once authorized, you will receive:
 
 To verify a license:
 
-1. Visit: https://kgiton.com/verify-license
-2. Enter your License ID
-3. Check license status and validity
+Email: support@kgiton.com
 
 ---
 
@@ -132,7 +130,7 @@ Response Time: Within 24 hours
 
 **Sales & Licensing**:  
 Email: support@kgiton.com  
-Phone: [Your Phone Number]
+Response Time: Within 24 hours
 
 **Security Issues**:  
 Email: support@kgiton.com  
@@ -176,4 +174,4 @@ For complete legal terms, see [LICENSE](LICENSE) file.
 
 **Ready to get started?**  
 📧 Contact us: support@kgiton.com  
-🌐 Visit: https://kgiton.com
+🌐 Visit: https://www.kgiton.com

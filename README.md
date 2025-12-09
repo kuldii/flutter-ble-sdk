@@ -488,7 +488,7 @@ See [LICENSE](LICENSE) file for complete terms and conditions.
 - **GitHub**: https://github.com/kuldii/flutter-ble-sdk
 - **Issues**: https://github.com/kuldii/flutter-ble-sdk/issues
 - **Email**: support@kgiton.com
-- **Website**: https://kgiton.com
+- **Website**: https://www.kgiton.com
 
 ## About PT KGiTON
 
