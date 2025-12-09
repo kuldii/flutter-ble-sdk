@@ -7,9 +7,13 @@ class BleDataValidator {
     // Must be non-empty and contain valid characters
     // Typically BLE device IDs are MAC addresses or UUIDs
     final macRegex = RegExp(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$');
-    final uuidRegex = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+    final uuidRegex = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    );
 
-    return macRegex.hasMatch(deviceId) || uuidRegex.hasMatch(deviceId) || deviceId.length >= 12; // Allow other formats
+    return macRegex.hasMatch(deviceId) ||
+        uuidRegex.hasMatch(deviceId) ||
+        deviceId.length >= 12; // Allow other formats
   }
 
   /// Validate UUID format
@@ -18,7 +22,9 @@ class BleDataValidator {
 
     // Support both 16-bit (4 chars) and 128-bit UUIDs
     final shortUuidRegex = RegExp(r'^[0-9a-fA-F]{4}$');
-    final fullUuidRegex = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+    final fullUuidRegex = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    );
 
     return shortUuidRegex.hasMatch(uuid) || fullUuidRegex.hasMatch(uuid);
   }
@@ -31,7 +37,9 @@ class BleDataValidator {
     final parts = charId.split('|');
     if (parts.length != 3) return false;
 
-    return isValidDeviceId(parts[0]) && isValidUuid(parts[1]) && isValidUuid(parts[2]);
+    return isValidDeviceId(parts[0]) &&
+        isValidUuid(parts[1]) &&
+        isValidUuid(parts[2]);
   }
 
   /// Validate byte array data
@@ -126,7 +134,11 @@ class BleDataSanitizer {
   }
 
   /// Pad data to specific length
-  static List<int> padToLength(List<int> data, int length, {int paddingByte = 0}) {
+  static List<int> padToLength(
+    List<int> data,
+    int length, {
+    int paddingByte = 0,
+  }) {
     if (data.length >= length) return data;
 
     return [...data, ...List.filled(length - data.length, paddingByte)];
@@ -147,7 +159,9 @@ class BleDataSanitizer {
   static String safeBytesToString(List<int> bytes) {
     try {
       // Remove null bytes and invalid UTF-8 sequences
-      final validBytes = bytes.where((b) => b != 0 && (b >= 32 && b <= 126 || b >= 128)).toList();
+      final validBytes = bytes
+          .where((b) => b != 0 && (b >= 32 && b <= 126 || b >= 128))
+          .toList();
       return String.fromCharCodes(validBytes).trim();
     } catch (e) {
       // Fallback: return hex representation

@@ -75,6 +75,9 @@ DerivedData/
 # Coverage
 coverage/
 *.lcov
+lcov.info
+test/.test_coverage.dart
+htmlcov/
 
 # Logs
 *.log
@@ -87,3 +90,6 @@ coverage/
 # Local development
 .env
 .env.local
+
+# Test artifacts
+.test_coverage.dart

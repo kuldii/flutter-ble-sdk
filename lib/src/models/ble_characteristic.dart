@@ -28,7 +28,14 @@ class BleCharacteristic {
   }
 
   Map<String, dynamic> toMap() {
-    return {'uuid': uuid, 'serviceUuid': serviceUuid, 'deviceId': deviceId, 'canRead': canRead, 'canWrite': canWrite, 'canNotify': canNotify};
+    return {
+      'uuid': uuid,
+      'serviceUuid': serviceUuid,
+      'deviceId': deviceId,
+      'canRead': canRead,
+      'canWrite': canWrite,
+      'canNotify': canNotify,
+    };
   }
 
   /// Unique identifier for this characteristic
@@ -45,5 +52,6 @@ class BleCharacteristic {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => 'BleCharacteristic(uuid: $uuid, read: $canRead, write: $canWrite, notify: $canNotify)';
+  String toString() =>
+      'BleCharacteristic(uuid: $uuid, read: $canRead, write: $canWrite, notify: $canNotify)';
 }

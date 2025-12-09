@@ -30,7 +30,10 @@ void main() {
           }
           return 'success';
         },
-        policy: RetryPolicy(maxAttempts: 3, initialDelay: Duration(milliseconds: 10)),
+        policy: RetryPolicy(
+          maxAttempts: 3,
+          initialDelay: Duration(milliseconds: 10),
+        ),
       );
 
       expect(result, 'success');
@@ -46,7 +49,10 @@ void main() {
             attempts++;
             throw Exception('Permanent failure');
           },
-          policy: RetryPolicy(maxAttempts: 3, initialDelay: Duration(milliseconds: 10)),
+          policy: RetryPolicy(
+            maxAttempts: 3,
+            initialDelay: Duration(milliseconds: 10),
+          ),
         ),
         throwsException,
       );
@@ -64,7 +70,11 @@ void main() {
             attempts++;
             throw FormatException('Not retryable');
           },
-          policy: RetryPolicy(maxAttempts: 3, initialDelay: Duration(milliseconds: 10), retryIf: (e) => e is! FormatException),
+          policy: RetryPolicy(
+            maxAttempts: 3,
+            initialDelay: Duration(milliseconds: 10),
+            retryIf: (e) => e is! FormatException,
+          ),
         ),
         throwsA(isA<FormatException>()),
       );

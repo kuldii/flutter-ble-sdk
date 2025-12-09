@@ -45,16 +45,17 @@ void main() {
 
     group('Characteristic ID Validation', () {
       test('should accept valid characteristic IDs', () {
-        // Format: deviceId:serviceUuid:charUuid (3 parts)
+        // Format: deviceId|serviceUuid|charUuid (3 parts with | separator)
         // Using UUID format for device ID to avoid : delimiter conflict
-        expect(BleDataValidator.isValidCharacteristicId('12345678-1234-1234-1234-123456789abc:180F:2A19'), true);
+        expect(BleDataValidator.isValidCharacteristicId('12345678-1234-1234-1234-123456789abc|180F|2A19'), true);
       });
 
       test('should reject invalid characteristic IDs', () {
         expect(BleDataValidator.isValidCharacteristicId(null), false);
         expect(BleDataValidator.isValidCharacteristicId(''), false);
         expect(BleDataValidator.isValidCharacteristicId('invalid'), false);
-        expect(BleDataValidator.isValidCharacteristicId('a:b'), false);
+        expect(BleDataValidator.isValidCharacteristicId('a|b'), false);
+        expect(BleDataValidator.isValidCharacteristicId('12345678-1234-1234-1234-123456789abc:180F:2A19'), false); // Wrong separator
       });
     });
 

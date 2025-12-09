@@ -49,11 +49,21 @@ abstract class KgitonBleSdkPlatform extends PlatformInterface {
   }
 
   // Characteristics
-  Future<void> setNotify(String deviceId, String serviceUuid, String charUuid, bool enable) {
+  Future<void> setNotify(
+    String deviceId,
+    String serviceUuid,
+    String charUuid,
+    bool enable,
+  ) {
     throw UnimplementedError('setNotify() has not been implemented.');
   }
 
-  Future<void> write(String deviceId, String serviceUuid, String charUuid, List<int> data) {
+  Future<void> write(
+    String deviceId,
+    String serviceUuid,
+    String charUuid,
+    List<int> data,
+  ) {
     throw UnimplementedError('write() has not been implemented.');
   }
 

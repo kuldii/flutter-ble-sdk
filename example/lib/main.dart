@@ -55,7 +55,9 @@ class _HomePageState extends State<HomePage> {
     final location = await Permission.locationWhenInUse.status;
 
     setState(() {
-      _permissionsGranted = bluetoothScan.isGranted && bluetoothConnect.isGranted && location.isGranted;
+      _permissionsGranted = bluetoothScan.isGranted &&
+          bluetoothConnect.isGranted &&
+          location.isGranted;
     });
   }
 
@@ -69,7 +71,8 @@ class _HomePageState extends State<HomePage> {
     bool allGranted = statuses.values.every((status) => status.isGranted);
 
     if (!allGranted) {
-      bool permanentlyDenied = statuses.values.any((status) => status.isPermanentlyDenied);
+      bool permanentlyDenied =
+          statuses.values.any((status) => status.isPermanentlyDenied);
       if (permanentlyDenied && mounted) {
         _showPermissionDialog();
         return false;
@@ -93,7 +96,9 @@ class _HomePageState extends State<HomePage> {
           'Please enable permissions in Settings.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
@@ -243,7 +248,8 @@ class _HomePageState extends State<HomePage> {
                       padding: const EdgeInsets.all(12.0),
                       child: Row(
                         children: [
-                          Icon(Icons.warning_amber, color: Colors.orange.shade700),
+                          Icon(Icons.warning_amber,
+                              color: Colors.orange.shade700),
                           const SizedBox(width: 8),
                           const Expanded(
                             child: Text(
@@ -284,7 +290,9 @@ class _HomePageState extends State<HomePage> {
                       _deviceFilter = value;
                     });
                   },
-                  controller: TextEditingController(text: _deviceFilter)..selection = TextSelection.collapsed(offset: _deviceFilter.length),
+                  controller: TextEditingController(text: _deviceFilter)
+                    ..selection =
+                        TextSelection.collapsed(offset: _deviceFilter.length),
                 ),
                 const SizedBox(height: 16),
 
@@ -302,7 +310,8 @@ class _HomePageState extends State<HomePage> {
                       label: const Text('Stop'),
                     ),
                     ElevatedButton.icon(
-                      onPressed: _connectedDeviceId != null ? _disconnectDevice : null,
+                      onPressed:
+                          _connectedDeviceId != null ? _disconnectDevice : null,
                       icon: const Icon(Icons.bluetooth_disabled),
                       label: const Text('Disconnect'),
                     ),
@@ -317,7 +326,8 @@ class _HomePageState extends State<HomePage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0),
                     child: Chip(
-                      avatar: const Icon(Icons.bluetooth_connected, color: Colors.green),
+                      avatar: const Icon(Icons.bluetooth_connected,
+                          color: Colors.green),
                       label: Text('Connected: $_connectedDeviceId'),
                       backgroundColor: Colors.green.shade50,
                     ),
@@ -329,7 +339,9 @@ class _HomePageState extends State<HomePage> {
 
           // Device List
           Expanded(
-            child: _connectedDeviceId == null ? _buildDeviceList() : _buildServiceList(),
+            child: _connectedDeviceId == null
+                ? _buildDeviceList()
+                : _buildServiceList(),
           ),
         ],
       ),

@@ -7,7 +7,8 @@ class BleException implements Exception {
   BleException(this.message, {this.originalError, this.stackTrace});
 
   @override
-  String toString() => 'BleException: $message${originalError != null ? ' ($originalError)' : ''}';
+  String toString() =>
+      'BleException: $message${originalError != null ? ' ($originalError)' : ''}';
 }
 
 /// Thrown when scan operations fail
@@ -15,14 +16,20 @@ class BleScanException extends BleException {
   BleScanException(super.message, {super.originalError, super.stackTrace});
 
   @override
-  String toString() => 'BleScanException: $message${originalError != null ? ' ($originalError)' : ''}';
+  String toString() =>
+      'BleScanException: $message${originalError != null ? ' ($originalError)' : ''}';
 }
 
 /// Thrown when connection operations fail
 class BleConnectionException extends BleException {
   final String? deviceId;
 
-  BleConnectionException(super.message, {this.deviceId, super.originalError, super.stackTrace});
+  BleConnectionException(
+    super.message, {
+    this.deviceId,
+    super.originalError,
+    super.stackTrace,
+  });
 
   @override
   String toString() =>
@@ -33,10 +40,16 @@ class BleConnectionException extends BleException {
 class BleServiceDiscoveryException extends BleException {
   final String deviceId;
 
-  BleServiceDiscoveryException(super.message, this.deviceId, {super.originalError, super.stackTrace});
+  BleServiceDiscoveryException(
+    super.message,
+    this.deviceId, {
+    super.originalError,
+    super.stackTrace,
+  });
 
   @override
-  String toString() => 'BleServiceDiscoveryException: $message (Device: $deviceId)${originalError != null ? ' ($originalError)' : ''}';
+  String toString() =>
+      'BleServiceDiscoveryException: $message (Device: $deviceId)${originalError != null ? ' ($originalError)' : ''}';
 }
 
 /// Thrown when characteristic operations fail
@@ -44,7 +57,13 @@ class BleCharacteristicException extends BleException {
   final String? characteristicId;
   final String operation;
 
-  BleCharacteristicException(super.message, this.operation, {this.characteristicId, super.originalError, super.stackTrace});
+  BleCharacteristicException(
+    super.message,
+    this.operation, {
+    this.characteristicId,
+    super.originalError,
+    super.stackTrace,
+  });
 
   @override
   String toString() =>
@@ -56,16 +75,25 @@ class BleTimeoutException extends BleException {
   final Duration timeout;
   final String operation;
 
-  BleTimeoutException(this.operation, this.timeout, {super.originalError, super.stackTrace})
-    : super('Operation timed out after ${timeout.inSeconds}s');
+  BleTimeoutException(
+    this.operation,
+    this.timeout, {
+    super.originalError,
+    super.stackTrace,
+  }) : super('Operation timed out after ${timeout.inSeconds}s');
 
   @override
-  String toString() => 'BleTimeoutException: $operation timed out after ${timeout.inSeconds}s';
+  String toString() =>
+      'BleTimeoutException: $operation timed out after ${timeout.inSeconds}s';
 }
 
 /// Thrown when Bluetooth is not available or not enabled
 class BleNotAvailableException extends BleException {
-  BleNotAvailableException(super.message, {super.originalError, super.stackTrace});
+  BleNotAvailableException(
+    super.message, {
+    super.originalError,
+    super.stackTrace,
+  });
 
   @override
   String toString() => 'BleNotAvailableException: $message';
@@ -75,8 +103,14 @@ class BleNotAvailableException extends BleException {
 class BlePermissionException extends BleException {
   final List<String> missingPermissions;
 
-  BlePermissionException(super.message, this.missingPermissions, {super.originalError, super.stackTrace});
+  BlePermissionException(
+    super.message,
+    this.missingPermissions, {
+    super.originalError,
+    super.stackTrace,
+  });
 
   @override
-  String toString() => 'BlePermissionException: $message (Missing: ${missingPermissions.join(', ')})';
+  String toString() =>
+      'BlePermissionException: $message (Missing: ${missingPermissions.join(', ')})';
 }

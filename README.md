@@ -5,6 +5,8 @@
 
   [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
   [![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey.svg)](https://github.com/kuldii/flutter-ble-sdk)
+  [![CI](https://github.com/kuldii/flutter-ble-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/kuldii/flutter-ble-sdk/actions/workflows/ci.yml)
+  [![codecov](https://codecov.io/gh/kuldii/flutter-ble-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/kuldii/flutter-ble-sdk)
 </div>
 
 Official Bluetooth Low Energy SDK for KGiTON Scale devices.
@@ -489,6 +491,70 @@ See [LICENSE](LICENSE) file for complete terms and conditions.
 - **Issues**: https://github.com/kuldii/flutter-ble-sdk/issues
 - **Email**: support@kgiton.com
 - **Website**: https://www.kgiton.com
+
+## Development
+
+### Prerequisites
+
+- Flutter SDK (3.0.0 or higher)
+- Dart SDK (included with Flutter)
+- lcov (for coverage reports): `brew install lcov`
+
+### Quick Start
+
+```bash
+# Setup development environment
+make dev
+
+# Run tests
+make test
+
+# Generate coverage report
+make coverage
+
+# Format and analyze code
+make check
+```
+
+### Available Commands
+
+See all available commands:
+```bash
+make help
+```
+
+Or use scripts directly:
+```bash
+./scripts/test.sh
+./scripts/analyze.sh
+./scripts/format.sh
+./scripts/generate_coverage.sh
+./scripts/clean.sh
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+flutter test
+
+# Run with coverage
+flutter test --coverage
+
+# Generate HTML coverage report
+./scripts/generate_coverage.sh
+```
+
+The coverage report will be available at `coverage/html/index.html`.
+
+### Code Quality
+
+This project maintains high code quality standards:
+
+- ✅ **Zero analyzer warnings** - Run `flutter analyze`
+- 🎨 **Formatted code** - Run `dart format`
+- 🧪 **Unit tests** - All utilities are tested
+- 📊 **Coverage tracking** - HTML reports with lcov
 
 ## About PT KGiTON
 

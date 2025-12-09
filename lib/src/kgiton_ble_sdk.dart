@@ -28,7 +28,8 @@ class KgitonBleSdk {
 
   // Connection state tracking
   final _connectionStates = <String, BleConnectionState>{};
-  final _connectionStateController = StreamController<Map<String, BleConnectionState>>.broadcast();
+  final _connectionStateController =
+      StreamController<Map<String, BleConnectionState>>.broadcast();
 
   // Notification streams per characteristic
   final _notificationControllers = <String, StreamController<List<int>>>{};
@@ -45,7 +46,11 @@ class KgitonBleSdk {
   /// Enable debug logging
   final bool enableLogging;
 
-  KgitonBleSdk({this.connectionConfig = ConnectionConfig.production, this.retryPolicy = RetryPolicy.defaultPolicy, this.enableLogging = false}) {
+  KgitonBleSdk({
+    this.connectionConfig = ConnectionConfig.production,
+    this.retryPolicy = RetryPolicy.defaultPolicy,
+    this.enableLogging = false,
+  }) {
     _setupListeners();
   }
 
@@ -66,7 +71,8 @@ class KgitonBleSdk {
         final deviceId = entry.key;
         final state = entry.value;
 
-        if (state.isDisconnected && _reconnectionManagers.containsKey(deviceId)) {
+        if (state.isDisconnected &&
+            _reconnectionManagers.containsKey(deviceId)) {
           _log('Device $deviceId disconnected, triggering reconnection');
           _reconnectionManagers[deviceId]!.handleDisconnection();
         }
@@ -99,20 +105,31 @@ class KgitonBleSdk {
 
     // Validate timeout
     if (!BleDataValidator.isValidTimeout(scanTimeout)) {
-      throw BleScanException('Invalid scan timeout: must be between 1s and 300s');
+      throw BleScanException(
+        'Invalid scan timeout: must be between 1s and 300s',
+      );
     }
 
-    _log('Starting scan (filter: ${deviceNameFilter ?? 'none'}, timeout: ${scanTimeout.inSeconds}s)');
+    _log(
+      'Starting scan (filter: ${deviceNameFilter ?? 'none'}, timeout: ${scanTimeout.inSeconds}s)',
+    );
 
     try {
       await RetryExecutor.execute(
-        operation: () => _platform.startScan(deviceNameFilter: deviceNameFilter, timeoutSeconds: scanTimeout.inSeconds),
+        operation: () => _platform.startScan(
+          deviceNameFilter: deviceNameFilter,
+          timeoutSeconds: scanTimeout.inSeconds,
+        ),
         policy: RetryPolicy.noRetry, // Don't retry scan operations
         operationName: 'startScan',
       );
     } catch (e, stackTrace) {
       _log('Scan failed: $e');
-      throw BleScanException('Failed to start scan', originalError: e, stackTrace: stackTrace);
+      throw BleScanException(
+        'Failed to start scan',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -134,7 +151,10 @@ class KgitonBleSdk {
   Future<void> connect(String deviceId) async {
     // Validate device ID
     if (!BleDataValidator.isValidDeviceId(deviceId)) {
-      throw BleConnectionException('Invalid device ID format', deviceId: deviceId);
+      throw BleConnectionException(
+        'Invalid device ID format',
+        deviceId: deviceId,
+      );
     }
 
     _log('Connecting to $deviceId...');
@@ -148,7 +168,8 @@ class KgitonBleSdk {
       );
 
       // Setup reconnection manager
-      if (connectionConfig.autoReconnect && !_reconnectionManagers.containsKey(deviceId)) {
+      if (connectionConfig.autoReconnect &&
+          !_reconnectionManagers.containsKey(deviceId)) {
         _reconnectionManagers[deviceId] = ReconnectionManager(
           deviceId: deviceId,
           connectFunction: () => _platform.connect(deviceId),
@@ -158,7 +179,8 @@ class KgitonBleSdk {
       }
 
       // Setup keep-alive if enabled
-      if (connectionConfig.enableKeepAlive && !_keepAliveManagers.containsKey(deviceId)) {
+      if (connectionConfig.enableKeepAlive &&
+          !_keepAliveManagers.containsKey(deviceId)) {
         _keepAliveManagers[deviceId] = KeepAliveManager(
           deviceId: deviceId,
           pingFunction: () async {
@@ -177,7 +199,12 @@ class KgitonBleSdk {
       _log('Connected to $deviceId successfully');
     } catch (e, stackTrace) {
       _log('Connection failed to $deviceId: $e');
-      throw BleConnectionException('Failed to connect', deviceId: deviceId, originalError: e, stackTrace: stackTrace);
+      throw BleConnectionException(
+        'Failed to connect',
+        deviceId: deviceId,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -208,7 +235,8 @@ class KgitonBleSdk {
   }
 
   /// Stream of connection state changes
-  Stream<Map<String, BleConnectionState>> get connectionState => _connectionStateController.stream;
+  Stream<Map<String, BleConnectionState>> get connectionState =>
+      _connectionStateController.stream;
 
   // ============================================
   // SERVICES & CHARACTERISTICS
@@ -243,21 +271,36 @@ class KgitonBleSdk {
       }
       _characteristicsCache[deviceId] = chars;
 
-      _log('Discovered ${services.length} services, ${chars.length} characteristics for $deviceId');
+      _log(
+        'Discovered ${services.length} services, ${chars.length} characteristics for $deviceId',
+      );
       return services;
     } catch (e, stackTrace) {
       _log('Service discovery failed for $deviceId: $e');
-      throw BleServiceDiscoveryException('Failed to discover services', deviceId, originalError: e, stackTrace: stackTrace);
+      throw BleServiceDiscoveryException(
+        'Failed to discover services',
+        deviceId,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
   /// Get a characteristic by UUID
-  BleCharacteristic? getCharacteristic(String deviceId, String serviceUuid, String charUuid) {
+  BleCharacteristic? getCharacteristic(
+    String deviceId,
+    String serviceUuid,
+    String charUuid,
+  ) {
     final chars = _characteristicsCache[deviceId];
     if (chars == null) return null;
 
     try {
-      return chars.firstWhere((c) => c.uuid.toLowerCase() == charUuid.toLowerCase() && c.serviceUuid.toLowerCase() == serviceUuid.toLowerCase());
+      return chars.firstWhere(
+        (c) =>
+            c.uuid.toLowerCase() == charUuid.toLowerCase() &&
+            c.serviceUuid.toLowerCase() == serviceUuid.toLowerCase(),
+      );
     } catch (e) {
       return null;
     }
@@ -271,7 +314,9 @@ class KgitonBleSdk {
   Future<void> setNotify(String characteristicId, bool enable) async {
     final parts = characteristicId.split('|');
     if (parts.length != 3) {
-      throw ArgumentError('Invalid characteristic ID format. Expected: deviceId|serviceUuid|charUuid');
+      throw ArgumentError(
+        'Invalid characteristic ID format. Expected: deviceId|serviceUuid|charUuid',
+      );
     }
 
     final deviceId = parts[0];
@@ -282,7 +327,8 @@ class KgitonBleSdk {
 
     // Create stream controller if enabling notifications
     if (enable && !_notificationControllers.containsKey(characteristicId)) {
-      _notificationControllers[characteristicId] = StreamController<List<int>>.broadcast();
+      _notificationControllers[characteristicId] =
+          StreamController<List<int>>.broadcast();
     }
   }
 
@@ -292,12 +338,20 @@ class KgitonBleSdk {
   Future<void> write(String characteristicId, List<int> data) async {
     // Validate characteristic ID
     if (!BleDataValidator.isValidCharacteristicId(characteristicId)) {
-      throw BleCharacteristicException('Invalid characteristic ID format', 'write', characteristicId: characteristicId);
+      throw BleCharacteristicException(
+        'Invalid characteristic ID format',
+        'write',
+        characteristicId: characteristicId,
+      );
     }
 
     // Validate data
     if (!BleDataValidator.isValidData(data)) {
-      throw BleCharacteristicException('Invalid data: contains values outside 0-255 range', 'write', characteristicId: characteristicId);
+      throw BleCharacteristicException(
+        'Invalid data: contains values outside 0-255 range',
+        'write',
+        characteristicId: characteristicId,
+      );
     }
 
     final parts = characteristicId.split('|');
@@ -312,7 +366,8 @@ class KgitonBleSdk {
 
     try {
       await RetryExecutor.executeWithTimeout(
-        operation: () => _platform.write(deviceId, serviceUuid, charUuid, sanitizedData),
+        operation: () =>
+            _platform.write(deviceId, serviceUuid, charUuid, sanitizedData),
         timeout: const Duration(seconds: 5),
         policy: retryPolicy,
         operationName: 'write',
@@ -324,7 +379,13 @@ class KgitonBleSdk {
       _log('Write successful to $characteristicId');
     } catch (e, stackTrace) {
       _log('Write failed to $characteristicId: $e');
-      throw BleCharacteristicException('Failed to write data', 'write', characteristicId: characteristicId, originalError: e, stackTrace: stackTrace);
+      throw BleCharacteristicException(
+        'Failed to write data',
+        'write',
+        characteristicId: characteristicId,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -334,7 +395,11 @@ class KgitonBleSdk {
   Future<List<int>> read(String characteristicId) async {
     // Validate characteristic ID
     if (!BleDataValidator.isValidCharacteristicId(characteristicId)) {
-      throw BleCharacteristicException('Invalid characteristic ID format', 'read', characteristicId: characteristicId);
+      throw BleCharacteristicException(
+        'Invalid characteristic ID format',
+        'read',
+        characteristicId: characteristicId,
+      );
     }
 
     final parts = characteristicId.split('|');
@@ -359,14 +424,21 @@ class KgitonBleSdk {
       return data;
     } catch (e, stackTrace) {
       _log('Read failed from $characteristicId: $e');
-      throw BleCharacteristicException('Failed to read data', 'read', characteristicId: characteristicId, originalError: e, stackTrace: stackTrace);
+      throw BleCharacteristicException(
+        'Failed to read data',
+        'read',
+        characteristicId: characteristicId,
+        originalError: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
   /// Get notification stream for a characteristic
   Stream<List<int>> notificationStream(String characteristicId) {
     if (!_notificationControllers.containsKey(characteristicId)) {
-      _notificationControllers[characteristicId] = StreamController<List<int>>.broadcast();
+      _notificationControllers[characteristicId] =
+          StreamController<List<int>>.broadcast();
     }
     return _notificationControllers[characteristicId]!.stream;
   }
