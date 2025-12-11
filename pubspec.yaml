@@ -1,6 +1,6 @@
 name: kgiton_ble_sdk
 description: Commercial BLE SDK for KGiTON Scale devices - Proprietary License (Authorization Required)
-version: 1.1.0
+version: 1.0.0
 homepage: https://github.com/kuldii/flutter-ble-sdk
 repository: https://github.com/kuldii/flutter-ble-sdk
 issue_tracker: https://github.com/kuldii/flutter-ble-sdk/issues

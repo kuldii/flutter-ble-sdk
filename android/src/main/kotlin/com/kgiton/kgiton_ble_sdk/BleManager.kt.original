@@ -56,10 +56,6 @@ class BleManager(private val context: Context) {
     // ============================================
 
     fun startScan(nameFilter: String?, timeoutSeconds: Int, result: MethodChannel.Result) {
-        startScanWithRetry(nameFilter, timeoutSeconds, result, retryCount = 0)
-    }
-
-    private fun startScanWithRetry(nameFilter: String?, timeoutSeconds: Int, result: MethodChannel.Result, retryCount: Int) {
         // Check Bluetooth adapter availability
         if (bluetoothAdapter == null) {
             Log.e(tag, "Bluetooth adapter is null")
@@ -71,21 +67,13 @@ class BleManager(private val context: Context) {
             Log.e(tag, "Bluetooth is not enabled")
             result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth is not enabled. Please enable Bluetooth.", null)
             return
-        }        // Check scanner with dynamic getter - will refresh if Bluetooth was just enabled
+        }
+
+        // Check scanner with dynamic getter - will refresh if Bluetooth was just enabled
         if (bluetoothLeScanner == null) {
-            // If scanner is null and Bluetooth is enabled, it might be initializing
-            // Retry up to 3 times with 300ms delay
-            if (retryCount < 3) {
-                Log.w(tag, "Bluetooth LE scanner is null (attempt ${retryCount + 1}/3) - waiting for Bluetooth to initialize...")
-                handler.postDelayed({
-                    startScanWithRetry(nameFilter, timeoutSeconds, result, retryCount + 1)
-                }, 150)
-                return
-            } else {
-                Log.e(tag, "Bluetooth LE scanner is still null after 3 retries - Bluetooth initialization failed")
-                result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth LE scanner not available after retry", null)
-                return
-            }
+            Log.e(tag, "Bluetooth LE scanner is null - Bluetooth may have just been enabled, retrying...")
+            result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth LE scanner not available", null)
+            return
         }
 
         // Check runtime permissions for different Android versions
@@ -130,7 +118,7 @@ class BleManager(private val context: Context) {
         try {
             // Start scan without filters to find all BLE devices
             bluetoothLeScanner.startScan(null, settings, scanCallback)
-            Log.d(tag, "BLE scan started successfully (filter: $nameFilter, timeout: ${timeoutSeconds}s)")
+            Log.d(tag, "BLE scan started (filter: $nameFilter, timeout: ${timeoutSeconds}s)")
 
             // Auto stop after timeout
             scanTimeoutRunnable = Runnable {
@@ -415,7 +403,7 @@ class BleManager(private val context: Context) {
                 Log.e(tag, "Service discovery timeout for $deviceId")
                 pendingResult.error("DISCOVERY_TIMEOUT", "Service discovery timed out", null)
             }
-        }, 2500) // 2.5 second timeout - faster response
+        }, 5000) // 5 second timeout
     }
 
     fun setNotify(deviceId: String, serviceUuid: String, charUuid: String, enable: Boolean, result: MethodChannel.Result) {
@@ -439,9 +427,6 @@ class BleManager(private val context: Context) {
 
         try {
             gatt.setCharacteristicNotification(characteristic, enable)
-            
-            // Minimal delay to avoid BLE command queue conflict
-            Thread.sleep(30)
             
             // Enable notification on descriptor
             val descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"))
