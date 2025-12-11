@@ -426,13 +426,13 @@ try {
 │  • MethodChannel Bridge             │
 └────────────┬────────────┬───────────┘
              │            │
-    ┌────────▼─────┐  ┌──▼──────────┐
+    ┌────────▼─────┐  ┌───▼─────────┐
     │   Android    │  │     iOS     │
     │  BleManager  │  │ (Stub)      │
     │  (Kotlin)    │  │ (Swift)     │
-    └────────┬─────┘  └──┬──────────┘
+    └────────┬─────┘  └───┬─────────┘
              │            │
-    ┌────────▼─────┐  ┌──▼──────────┐
+    ┌────────▼─────┐  ┌───▼──────────┐
     │  Android     │  │ CoreBluetooth│
     │  BLE API     │  │   Framework  │
     └──────────────┘  └──────────────┘
@@ -564,4 +564,4 @@ PT KGiTON is a leading provider of smart scale solutions for industrial and comm
 
 **Made with ❤️ by PT KGiTON**
 
-*Version 1.0.0 - December 2, 2025*
+*Version 1.0.0 - December 11, 2025*
