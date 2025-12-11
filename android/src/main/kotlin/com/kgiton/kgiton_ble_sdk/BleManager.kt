@@ -25,7 +25,12 @@ import java.util.concurrent.ConcurrentHashMap
 class BleManager(private val context: Context) {
     private val tag = "KgitonBLE"
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-    private val bluetoothLeScanner: BluetoothLeScanner? = bluetoothAdapter?.bluetoothLeScanner
+    
+    // Use dynamic getter to refresh scanner when Bluetooth is turned on/off
+    // This fixes the issue where scanner is null if Bluetooth was off during initialization
+    private val bluetoothLeScanner: BluetoothLeScanner?
+        get() = bluetoothAdapter?.bluetoothLeScanner
+        
     private val handler = Handler(Looper.getMainLooper())
 
     private var eventSink: EventChannel.EventSink? = null
@@ -64,8 +69,9 @@ class BleManager(private val context: Context) {
             return
         }
 
+        // Check scanner with dynamic getter - will refresh if Bluetooth was just enabled
         if (bluetoothLeScanner == null) {
-            Log.e(tag, "Bluetooth LE scanner is null")
+            Log.e(tag, "Bluetooth LE scanner is null - Bluetooth may have just been enabled, retrying...")
             result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth LE scanner not available", null)
             return
         }
