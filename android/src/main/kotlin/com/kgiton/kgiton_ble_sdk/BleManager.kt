@@ -129,7 +129,16 @@ class BleManager(private val context: Context) {
 
         try {
             // Start scan without filters to find all BLE devices
-            bluetoothLeScanner.startScan(null, settings, scanCallback)
+            // Use local variable to avoid Kotlin smart cast issue with custom getter
+            val scanner = bluetoothLeScanner
+            if (scanner == null) {
+                Log.e(tag, "Bluetooth LE scanner became null")
+                result.error("BLUETOOTH_UNAVAILABLE", "Bluetooth LE scanner not available", null)
+                isScanning = false
+                return
+            }
+            
+            scanner.startScan(null, settings, scanCallback)
             Log.d(tag, "BLE scan started successfully (filter: $nameFilter, timeout: ${timeoutSeconds}s)")
 
             // Auto stop after timeout
